@@ -1054,7 +1054,7 @@ curl_config() {
         --enable-dict --enable-netrc \
         --enable-bearer-auth --enable-tls-srp --enable-dnsshuffle \
         --enable-get-easy-options --enable-progress-meter \
-        --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt \
+        --with-ca-bundle=/system/etc/curl/cacert.pem \
         --with-ca-path=/etc/ssl/certs \
         --with-ca-fallback --enable-ares --enable-httpsrr --enable-ipfs \
         --disable-ldap --disable-ldaps --enable-ssls-export \
