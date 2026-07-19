@@ -971,32 +971,35 @@ compile_zstd() {
     if [ ! -f "${PREFIX}/lib/libzstd.a" ]; then cp -f lib/libzstd.a "${PREFIX}/lib/libzstd.a"; fi
 }
 
-compile_trurl() {
-    case "${ENABLE_TRURL}" in
-        true|1|yes|on|y|Y)
-            echo ;;
-        *)
-            return ;;
-    esac
-
-    echo "Compiling trurl, Arch: ${ARCH}" | tee "${RELEASE_DIR}/running"
+compile_curl() {
+    echo "Compiling curl, Arch: ${ARCH}" | tee "${RELEASE_DIR}/running"
     local url
     change_dir;
 
-    url_from_github curl/trurl "${TRURL_VERSION}"
-    url="${URL}"
-    download_and_extract "${url}"
+    rm -rf curl
+    rm -rf curl-*
 
-    export PATH=${PREFIX}/bin:$PATH
-
-    LDFLAGS="-static -Wl,-s ${LDFLAGS}" make PREFIX="${PREFIX}";
-    make install;
-
-    if [ -f LICENSES/COPYING ]; then
-        _copy_license LICENSES/COPYING trurl;
-    elif [ -f LICENSES/curl.txt ]; then
-        _copy_license LICENSES/curl.txt trurl;
+    if [ "${CURL_VERSION}" = "dev" ]; then
+        rm -rf curl-dev
+    else
+        rm -rf curl
     fi
+
+    if [ "${CURL_VERSION}" = "dev" ]; then
+        if [ ! -d "curl-dev" ]; then
+            git clone --depth 1 https://github.com/curl/curl.git curl-dev;
+        fi
+        cd curl-dev;
+        make clean || true;
+    else
+        url_from_github curl/curl "${CURL_VERSION}";
+        url="${URL}";
+        download_and_extract "${url}";
+        if [ ! -f src/.checksrc ]; then echo "enable STDERR" > src/.checksrc; fi
+        [ -z "${CURL_VERSION}" ] && CURL_VERSION=$(echo "${SOURCE_DIR}" | cut -d'-' -f 2);
+    fi
+
+    curl_config;
 }
 
 curl_config() {
@@ -1049,7 +1052,7 @@ curl_config() {
         --enable-alt-svc --enable-websockets \
         --enable-ipv6 --enable-unix-sockets --enable-socketpair \
         --enable-headers-api --enable-versioned-symbols \
-        --enable-threaded-resolver --enable-optimize \
+        --disable-threaded-resolver --enable-optimize \
         --enable-warnings --enable-libcurl-option \
         --enable-dict --enable-netrc \
         --enable-bearer-auth --enable-tls-srp --enable-dnsshuffle \
