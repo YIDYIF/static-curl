@@ -1056,7 +1056,7 @@ curl_config() {
         --enable-get-easy-options --enable-progress-meter \
         --with-ca-bundle=/system/etc/curl/cacert.pem \
         --with-ca-path=/etc/ssl/certs \
-        --with-ca-fallback --enable-ares --enable-httpsrr --enable-ipfs \
+        --with-ca-fallback --disable-ares --enable-httpsrr --enable-ipfs \
         --disable-ldap --disable-ldaps --enable-ssls-export \
         "${ENABLE_DEBUG}";
 }
